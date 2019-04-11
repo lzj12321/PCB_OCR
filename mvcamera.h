@@ -9,7 +9,6 @@
 #define HARDWARE_MODE 1
 #define CONTINUOUS_MODE 2
 
-test git  test git
 class MVCamera
 {
 public:
