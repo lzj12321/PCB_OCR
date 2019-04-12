@@ -156,3 +156,14 @@ void cvAndUi::drawROI(cv::Mat &mat, uint roix, uint roiy, uint w, uint h,cv::Sca
     cv::Rect rect=cv::Rect(roix,roiy,w,h);
     cv::rectangle(mat,rect,color,thickness);
 }
+
+cv::Point cvAndUi::getPointAffinedPos(const cv::Point &src, const cv::Point &center,const cv::Point&center2, double angle)
+{
+    cv::Point dst;
+    int x = src.x - center.x;
+    int y = src.y - center.y;
+    dst.x = cvRound(x * cos(angle) + y * sin(angle) + center2.x);
+    dst.y = cvRound(-x * sin(angle) + y * cos(angle) + center2.y);
+    qDebug()<<"cos angle:"<<cos(angle);
+    return dst;
+}

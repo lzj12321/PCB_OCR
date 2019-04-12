@@ -19,7 +19,7 @@ MainWindow::MainWindow(QWidget *parent):
     setDlg=new settingsDlg;
     iconPreProcess();
     ui->lineEdit->setReadOnly(true);
-    showFullScreen();
+   // showFullScreen();
     openCamera();
     connect(setDlg,SIGNAL(cameraParamChanged(uint,uint)),this,SLOT(slotCameraParamChanged(uint,uint)));
 }
@@ -117,7 +117,7 @@ QString MainWindow::readResultFromTxt(QString txtPath)
     QString result="";
     QFile file(txtPath);
     if(!file.open(QFile::ReadOnly|QIODevice::Text)){
-        QMessageBox::warning(NULL,"Warning!","failed to open result txt!");
+        //QMessageBox::warning(NULL,"Warning!","failed to open result txt!");
         return result;
     }
 

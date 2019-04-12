@@ -40,6 +40,21 @@ int preProcessImg::extractValidCodeRegion(const cv::Mat &src)
     if(angle>=srcImgAngleRange||angle<=-srcImgAngleRange)
         return ANGLE_UNCERTAIN;
 
+
+
+    cv::Point p1,p2;
+    cv::Mat test=src.clone();
+    showTool.rotate3CMat(test,test,angle);
+    qDebug()<<"angle:"<<angle;
+    //angle=abs(angle);
+    float angle1=(angle/180)*3.14;
+    p1=showTool.getPointAffinedPos(cv::Point(resultLine[0],resultLine[1]),cv::Point(src.cols/2,src.rows/2),cv::Point(test.cols/2,test.rows/2),angle1);
+    p2=showTool.getPointAffinedPos(cv::Point(resultLine[2],resultLine[3]),cv::Point(src.cols/2,src.rows/2),cv::Point(test.cols/2,test.rows/2),angle1);
+    cv::line(test,p1,p2,cv::Scalar(0,255,0),2);
+    cv::imshow("test",test);
+
+
+
     /////////rotate the img and mask////////////////////////
     cv::Mat dstRotate;
     cv::Mat dstMask=cv::Mat(roiMat.rows,roiMat.cols,CV_8UC1,cv::Scalar::all(255));
@@ -252,10 +267,14 @@ float preProcessImg::detectLineAngle(cv::Mat src)
     }
     resultSlope=(maxLine[3]-maxLine[1])/(float)(maxLine[2]-maxLine[0]);
     resultLine[0]=0;
-    resultLine[1]=maxLine[1];
+    resultLine[1]=cvRound(maxLine[1]-resultSlope*maxLine[0]);
     resultLine[2]=thrMat.cols;
     resultLine[3]=cvRound(resultSlope*(resultLine[2]-resultLine[0])+resultLine[1]);
-    //cv::line(contoursMat,cv::Point(resultLine[0], resultLine[1]), cv::Point(resultLine[2], resultLine[3]), cv::Scalar(0,0,255),2);
+//    //contoursMat=cannyMat.clone();
+//    contoursMat=src.clone();
+//    //cv::cvtColor(src,contoursMat,cv::COLOR_GRAY2RGB);
+//    cv::line(contoursMat,cv::Point(resultLine[0], resultLine[1]), cv::Point(resultLine[2], resultLine[3]), cv::Scalar(0,0,255),2);
+//    cv::imshow("cannymat",contoursMat);
    // qDebug()<<"slope:"<<resultSlope;
     pcbAngle=atan(resultSlope);
     pcbAngle=pcbAngle/3.14*180;
