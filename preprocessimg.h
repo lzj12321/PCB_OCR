@@ -6,6 +6,7 @@
 #include<opencv2/opencv.hpp>
 #include<cvandui.h>
 
+#define NOMATCH_REGION_DETECTED 0
 #define INVALID_INPUT_IMG -1
 #define ANGLE_UNCERTAIN -2
 #define ROI_UNCERTAIN -3
@@ -24,7 +25,6 @@ public:
     cv::Mat maskMat;
     cv::Mat maskMulSrcMat;
     cv::Mat dilateContourMat;
-    cv::Mat showMat;
 public:
     std::vector<std::vector<cv::Point>> filterContours;
     std::vector<cv::Rect> validCodeRect;
@@ -35,11 +35,6 @@ public:
     cv::Vec4i resultLine;
     float pcbAngle=361;
 private:
-    uint roiX=0;
-    uint roiY=0;
-    uint roiWidth=0;
-    uint roiHeight=0;
-
     uint thresholdValue=170;
     uint thresholdFlag=cv::THRESH_BINARY;
 
@@ -56,30 +51,27 @@ private:
     uint minValidRegionWidth=200;
     uint maxValidRegionWidth;
 
-    uint minValidRegionHeight;
-    uint maxValidRegionHeight;
+    int srcImgAngleRange=15;
+    int roiImgAngleRange=10;
+
 private:
     cvAndUi showTool;
 public:
     preProcessImg();
-    void saveValidCodeMat();
-public:
-    cv::Rect createRoiRect(const std::vector<std::vector<cv::Point>>&contours,const cv::Size&matSize);
-    void setRoiParam(uint x,uint y,uint w,uint h);
-    void createRoiMat();
-    void createShowMat();
-    cv::Mat createContourMask(const std::vector<std::vector<cv::Point>>&contours,cv::Size);
-    void contourFilter(std::vector<std::vector<cv::Point>>&contours);
-    cv::Mat resizeMat(const cv::Mat& src, float i);
-
     /////////ini data//////////
     void processDataIni();
 
     ///////////entrance///////////////
     int extractValidCodeRegion(const cv::Mat&);
 
-    ///////////get the roi mat///////////
-    void setRoiMat();
+    //////////detect the src img angle//////////
+    float detectLineAngle(cv::Mat src);
+
+    //////////detect the font's color////////////
+    bool detectCharacterColor(cv::Mat src);
+
+    /////////detect the roi img's angle and set the roi mat/////////
+    int detectLineAndSetRoiRegion(cv::Mat src,const cv::Mat&mask,cv::Mat& dst);
 
     ///////////threshold the roimat//////
     void thresholdImg();
@@ -99,11 +91,10 @@ public:
     ///////refine valid rect////////////////////////
     void refineValidRect();
 
-    float detectLineAngle(cv::Mat src);
+    ///////save the valid code region mat//////////
+    void saveValidCodeMat();
 
-    bool detectCharacterColor(cv::Mat src);
-
-    int detectLineAndSetRoiRegion(cv::Mat src,const cv::Mat&mask,cv::Mat& dst);
+    void rectifyMat(cv::Mat&mat);
 
 public slots:
     void slotSetPreProcessParam(uint _thresholdValue, uint _thresholdFlag,

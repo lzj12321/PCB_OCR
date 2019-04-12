@@ -34,6 +34,11 @@ uint settingsDlg::getExposeTime()
     return exposeTime;
 }
 
+uint settingsDlg::getAnalogGain()
+{
+    return analogGain;
+}
+
 void settingsDlg::settingsDlgIni()
 {
     cv::Mat tempMat=sourceMat.clone();
@@ -48,6 +53,14 @@ void settingsDlg::settingsDlgIni()
     pt1Y=roiY;
     pt2X=roiX+roiWidth;
     pt2Y=roiY+roiHeight;
+
+    ui->lineEdit->setValidator(new QIntValidator(1,2000));
+    ui->lineEdit_2->setValidator(new QIntValidator(1,30));
+    ui->horizontalSlider->setRange(1,2000);
+    ui->horizontalSlider->setValue(exposeTime);
+
+    ui->lineEdit_2->setText(QString::number(analogGain,10));
+    ui->lineEdit->setText(QString::number(exposeTime,10));
 }
 
 void settingsDlg::restorePaintingStatus()
@@ -164,8 +177,14 @@ void settingsDlg::on_pushButton_2_clicked()
     }
     settingsDlgIni();
     emit roiChanged(roiX,roiY,roiWidth,roiHeight);
+
     paramSave();
     isRoiChanged=false;
+
+    analogGain=ui->lineEdit_2->text().toInt();
+    exposeTime=ui->lineEdit->text().toInt();
+    emit cameraParamChanged(exposeTime,analogGain);
+
     close();
 }
 
@@ -207,6 +226,7 @@ void settingsDlg::paramSave()
     paramWrite.setValue("ROI/roiWidth",roiWidth);
     paramWrite.setValue("ROI/roiHeight",roiHeight);
     paramWrite.setValue("CAMERA/exposeTime",exposeTime);
+    paramWrite.setValue("CAMERA/analogGain",analogGain);
 }
 
 void settingsDlg::paramLoad()
@@ -217,6 +237,7 @@ void settingsDlg::paramLoad()
     roiWidth=paramRead.value("ROI/roiWidth").toInt();
     roiHeight=paramRead.value("ROI/roiHeight").toInt();
     exposeTime=paramRead.value("CAMERA/exposeTime").toInt();
+    analogGain=paramRead.value("CAMERA/analogGain").toInt();
 }
 
 void settingsDlg::on_pushButton_4_clicked()
@@ -227,10 +248,8 @@ void settingsDlg::on_pushButton_4_clicked()
 void settingsDlg::on_horizontalSlider_sliderMoved(int position)
 {
     if(position==0)return;
-    //cameraMap[cameraSerialNumIndexMap[comboxIndex]]->setCameraExpose(position);
-    //(*mapCameraExposeTimePtr)[cameraSerialNumIndexMap[comboxIndex]]=position;
-    ui->lineEdit->setText(QString::number(position,10)+"ms");
-    emit exposeTimeChanged(position);
+    //exposeTime=position;
+    ui->lineEdit->setText(QString::number(position,10));
 }
 
 void settingsDlg::on_pushButton_6_clicked()

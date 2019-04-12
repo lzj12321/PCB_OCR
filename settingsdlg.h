@@ -21,6 +21,7 @@ public:
     ~settingsDlg();
     void getRoiParam(uint& roiX,uint& roiY,uint& roiWidth,uint& roiHeight);
     uint getExposeTime();
+    uint getAnalogGain();
 private:
     cv::Mat sourceMat;
 
@@ -29,6 +30,7 @@ private:
     uint roiWidth=0;
     uint roiHeight=0;
     uint exposeTime=0;
+    uint analogGain=0;
 
     bool pRoiStatus=false;
     bool isRoiChanged=false;
@@ -67,7 +69,7 @@ private slots:
 
 signals:
     void roiChanged(uint roiX,uint roiY,uint roiWidth,uint roiHeight);
-    void exposeTimeChanged(uint eposetime);
+    void cameraParamChanged(uint eposetime,uint analoggain);
     void startGrab(QLabel*);
     void stopGrab();
 };

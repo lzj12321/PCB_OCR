@@ -50,6 +50,8 @@ bool MVCamera::iniCamera()
         // 获得该相机的特性描述
         // Get the camera's feature description
         CameraGetCapability(cameraHandler, &CameraInfo);
+        //CameraSetCallbackFunction(cameraHandler,&grabCallBackFun,NULL,NULL);
+        //CameraGrabber_SetFrameListener(cameraHandler)
         return true;
     }
 }
@@ -116,13 +118,13 @@ cv::Mat MVCamera::grabImg()
 
         // At this point, the picture has been stored in pFrameBuffer. For pFrameBuffer=RGB data in color camera, pFrameBuffer=8bit gray data in mono camera.
         // In this example we just saved the image to a hard disk file
-        QString img="C:/Users/lzj/Desktop/test1231.bmp";
-        status = CameraSaveImage(cameraHandler,const_cast<char*>(img.toStdString().c_str()), pFrameBuffer, &FrameHead, bMonoCamera ? FILE_BMP_8BIT : FILE_BMP, 100);
-        if (status == CAMERA_STATUS_SUCCESS)
-            qDebug()<<"Save image successfully.";
+//        //QString img="C:/Users/lzj/Desktop/test1231.bmp";
+//        //status = CameraSaveImage(cameraHandler,const_cast<char*>(img.toStdString().c_str()), pFrameBuffer, &FrameHead, bMonoCamera ? FILE_BMP_8BIT : FILE_BMP, 100);
+//        if (status == CAMERA_STATUS_SUCCESS)
+//            qDebug()<<"Save image successfully.";
 
-        else
-            qDebug()<<"Save image failed.";
+//        else
+//            qDebug()<<"Save image failed.";
     }
     else
     {
@@ -155,9 +157,20 @@ bool MVCamera::setExpose(uint expTime)
         return false;
 }
 
+bool MVCamera::setAnalogGain(uint gain)
+{
+    if(CameraSetAnalogGain(cameraHandler,gain)==CAMERA_STATUS_SUCCESS)
+    {
+        qDebug()<<"set analog gain sucess";
+        return true;
+    }
+    else
+        return false;
+}
+
 bool MVCamera::setTriggerMode(uint mode)
 {
-    // 设置相机为软触发模式，并且把一次触发的帧数固定为1
+    // 0 means continuous acquisition mode; 1 means software trigger mode; 2 means hardware trigger mode.
     // Set the camera to soft trigger mode and fix the number of frames triggered at one time to 1
     if(CameraSetTriggerMode(cameraHandler, mode)!=CAMERA_STATUS_SUCCESS)
         return false;
@@ -165,6 +178,12 @@ bool MVCamera::setTriggerMode(uint mode)
         return true;
     else
         return false;
+}
+
+bool MVCamera::setTriggerDelayTime(uint delayTime)
+{
+    if(CameraSetTriggerDelayTime(cameraHandler,delayTime)==CAMERA_STATUS_SUCCESS)
+        return true;
 }
 
 void MVCamera::closeCamera()

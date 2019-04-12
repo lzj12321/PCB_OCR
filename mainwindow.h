@@ -43,12 +43,16 @@ private:
     bool confirmResultIsValid(QString resultCode);
     void outputProcessResult(int);
     cv::Mat drawResultMat();
+    void showResultMat();
     bool openCamera();
     void processImg();
 
 private slots:
     void slotStartGrab(QLabel*);
     void slotStopGrab();
+    void slotCameraParamChanged(uint,uint);
+    void on_comboBox_currentIndexChanged(int index);
+    void on_pushButton_5_clicked();
 };
 
 #endif // MAINWINDOW_H

@@ -47,7 +47,7 @@
    <property name="geometry">
     <rect>
      <x>1040</x>
-     <y>320</y>
+     <y>380</y>
      <width>111</width>
      <height>51</height>
     </rect>
@@ -86,24 +86,11 @@
     <set>Qt::AlignCenter</set>
    </property>
   </widget>
-  <widget class="QLabel" name="label_3">
-   <property name="geometry">
-    <rect>
-     <x>780</x>
-     <y>690</y>
-     <width>171</width>
-     <height>17</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string/>
-   </property>
-  </widget>
   <widget class="QPushButton" name="pushButton_2">
    <property name="geometry">
     <rect>
      <x>908</x>
-     <y>400</y>
+     <y>460</y>
      <width>111</width>
      <height>51</height>
     </rect>
@@ -123,7 +110,7 @@
    <property name="geometry">
     <rect>
      <x>1040</x>
-     <y>400</y>
+     <y>460</y>
      <width>111</width>
      <height>51</height>
     </rect>
@@ -146,7 +133,7 @@
    <property name="geometry">
     <rect>
      <x>910</x>
-     <y>590</y>
+     <y>280</y>
      <width>111</width>
      <height>28</height>
     </rect>
@@ -159,7 +146,7 @@
    <property name="geometry">
     <rect>
      <x>910</x>
-     <y>320</y>
+     <y>380</y>
      <width>111</width>
      <height>51</height>
     </rect>
@@ -177,12 +164,12 @@
   </widget>
   <widget class="QSlider" name="horizontalSlider">
    <property name="enabled">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="geometry">
     <rect>
-     <x>919</x>
-     <y>700</y>
+     <x>929</x>
+     <y>210</y>
      <width>201</width>
      <height>22</height>
     </rect>
@@ -193,12 +180,12 @@
   </widget>
   <widget class="QLineEdit" name="lineEdit">
    <property name="enabled">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="geometry">
     <rect>
-     <x>1030</x>
-     <y>660</y>
+     <x>1040</x>
+     <y>170</y>
      <width>91</width>
      <height>21</height>
     </rect>
@@ -207,17 +194,17 @@
     <set>Qt::AlignCenter</set>
    </property>
    <property name="readOnly">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
   </widget>
   <widget class="QLabel" name="label_4">
    <property name="enabled">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="geometry">
     <rect>
-     <x>920</x>
-     <y>660</y>
+     <x>930</x>
+     <y>170</y>
      <width>101</width>
      <height>16</height>
     </rect>
@@ -233,13 +220,61 @@
    <property name="geometry">
     <rect>
      <x>1040</x>
-     <y>590</y>
+     <y>280</y>
      <width>111</width>
      <height>28</height>
     </rect>
    </property>
    <property name="text">
     <string>stop grab</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_3">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>980</x>
+     <y>570</y>
+     <width>91</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="lineEdit_2">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>1040</x>
+     <y>120</y>
+     <width>91</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+   <property name="readOnly">
+    <bool>false</bool>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_5">
+   <property name="geometry">
+    <rect>
+     <x>930</x>
+     <y>120</y>
+     <width>91</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>analog gain</string>
    </property>
   </widget>
  </widget>
