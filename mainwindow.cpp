@@ -233,7 +233,15 @@ cv::Mat MainWindow::drawResultMat()
 
 bool MainWindow::openCamera()
 {
-    return cameraTool.openCamera();
+    bool cameraStatus=cameraTool.openCamera();
+    if(cameraStatus)
+    {
+        cameraTool.setExpose(setDlg->getExposeTime());
+        qDebug()<<setDlg->getExposeTime();
+    }
+    else
+        ui->label_3->setText("相机掉线!");
+    return cameraStatus;
 }
 
 void MainWindow::processImg()
@@ -267,6 +275,16 @@ void MainWindow::processImg()
         ui->lineEdit->setText("未识别到有效字符串！");
     }
     processTime=timer.elapsed();
+}
+
+void MainWindow::slotStartGrab(QLabel * label)
+{
+
+}
+
+void MainWindow::slotStopGrab()
+{
+
 }
 
 void MainWindow::on_pushButton_4_clicked()

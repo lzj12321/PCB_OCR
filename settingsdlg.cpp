@@ -29,6 +29,11 @@ void settingsDlg::getRoiParam(uint &_roiX, uint &_roiY, uint &_roiWidth, uint &_
     _roiHeight=roiHeight;
 }
 
+uint settingsDlg::getExposeTime()
+{
+    return exposeTime;
+}
+
 void settingsDlg::settingsDlgIni()
 {
     cv::Mat tempMat=sourceMat.clone();
@@ -201,6 +206,7 @@ void settingsDlg::paramSave()
     paramWrite.setValue("ROI/roiY",roiY);
     paramWrite.setValue("ROI/roiWidth",roiWidth);
     paramWrite.setValue("ROI/roiHeight",roiHeight);
+    paramWrite.setValue("CAMERA/exposeTime",exposeTime);
 }
 
 void settingsDlg::paramLoad()
@@ -210,9 +216,24 @@ void settingsDlg::paramLoad()
     roiY=paramRead.value("ROI/roiY").toInt();
     roiWidth=paramRead.value("ROI/roiWidth").toInt();
     roiHeight=paramRead.value("ROI/roiHeight").toInt();
+    exposeTime=paramRead.value("CAMERA/exposeTime").toInt();
 }
 
 void settingsDlg::on_pushButton_4_clicked()
 {
+    emit startGrab(ui->label);
+}
 
+void settingsDlg::on_horizontalSlider_sliderMoved(int position)
+{
+    if(position==0)return;
+    //cameraMap[cameraSerialNumIndexMap[comboxIndex]]->setCameraExpose(position);
+    //(*mapCameraExposeTimePtr)[cameraSerialNumIndexMap[comboxIndex]]=position;
+    ui->lineEdit->setText(QString::number(position,10)+"ms");
+    emit exposeTimeChanged(position);
+}
+
+void settingsDlg::on_pushButton_6_clicked()
+{
+    emit stopGrab();
 }

@@ -89,7 +89,7 @@
     </property>
     <property name="font">
      <font>
-      <pointsize>150</pointsize>
+      <pointsize>120</pointsize>
       <weight>75</weight>
       <italic>false</italic>
       <bold>true</bold>

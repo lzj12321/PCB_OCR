@@ -47,12 +47,9 @@ bool MVCamera::iniCamera()
             return false;
         }
 
-
         // 获得该相机的特性描述
         // Get the camera's feature description
         CameraGetCapability(cameraHandler, &CameraInfo);
-
-
         return true;
     }
 }
@@ -115,7 +112,6 @@ cv::Mat MVCamera::grabImg()
         for(uint i=0;i<FrameBufferSize;++i)
         {
             matPtr[i]=dataPtr[i];
-//            matPtr[i]=123;
         }
 
         // At this point, the picture has been stored in pFrameBuffer. For pFrameBuffer=RGB data in color camera, pFrameBuffer=8bit gray data in mono camera.
@@ -151,18 +147,24 @@ bool MVCamera::setExpose(uint expTime)
 {
     // 手动曝光，曝光时间30ms
     // Manual exposure, exposure time 30ms
-    CameraSetAeState(cameraHandler, FALSE);
-    CameraSetExposureTime(cameraHandler, expTime * 1000);
-    return true;
+    if(CameraSetAeState(cameraHandler, FALSE)!=CAMERA_STATUS_SUCCESS)
+        return false;
+    if(CameraSetExposureTime(cameraHandler, expTime * 1000)== CAMERA_STATUS_SUCCESS)
+        return true;
+    else
+        return false;
 }
 
 bool MVCamera::setTriggerMode(uint mode)
 {
     // 设置相机为软触发模式，并且把一次触发的帧数固定为1
     // Set the camera to soft trigger mode and fix the number of frames triggered at one time to 1
-    CameraSetTriggerMode(cameraHandler, mode);
-    CameraSetTriggerCount(cameraHandler, 1);
-    return true;
+    if(CameraSetTriggerMode(cameraHandler, mode)!=CAMERA_STATUS_SUCCESS)
+        return false;
+    if(CameraSetTriggerCount(cameraHandler, 1)==CAMERA_STATUS_SUCCESS)
+        return true;
+    else
+        return false;
 }
 
 void MVCamera::closeCamera()
@@ -172,8 +174,8 @@ void MVCamera::closeCamera()
     CameraUnInit(cameraHandler);
 
     // release RGB buffer
-   // BYTE* pFrameBuffer = (BYTE *)CameraAlignMalloc(FrameBufferSize, 16);
+    // BYTE* pFrameBuffer = (BYTE *)CameraAlignMalloc(FrameBufferSize, 16);
 
-  //  CameraAlignFree(pFrameBuffer);
+    //  CameraAlignFree(pFrameBuffer);
 
 }

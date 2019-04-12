@@ -45,6 +45,10 @@ private:
     cv::Mat drawResultMat();
     bool openCamera();
     void processImg();
+
+private slots:
+    void slotStartGrab(QLabel*);
+    void slotStopGrab();
 };
 
 #endif // MAINWINDOW_H

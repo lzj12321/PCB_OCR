@@ -20,6 +20,7 @@ public:
     explicit settingsDlg(QWidget *parent = 0);
     ~settingsDlg();
     void getRoiParam(uint& roiX,uint& roiY,uint& roiWidth,uint& roiHeight);
+    uint getExposeTime();
 private:
     cv::Mat sourceMat;
 
@@ -27,6 +28,8 @@ private:
     uint roiY=0;
     uint roiWidth=0;
     uint roiHeight=0;
+    uint exposeTime=0;
+
     bool pRoiStatus=false;
     bool isRoiChanged=false;
     double ratio=0;
@@ -58,8 +61,15 @@ private slots:
     void on_pushButton_5_clicked();
     void on_pushButton_4_clicked();
 
+    void on_horizontalSlider_sliderMoved(int position);
+
+    void on_pushButton_6_clicked();
+
 signals:
     void roiChanged(uint roiX,uint roiY,uint roiWidth,uint roiHeight);
+    void exposeTimeChanged(uint eposetime);
+    void startGrab(QLabel*);
+    void stopGrab();
 };
 
 #endif // SETTINGSDLG_H
