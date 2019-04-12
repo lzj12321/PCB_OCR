@@ -22,29 +22,41 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
-INCLUDEPATH +=D:\opencv4.0.1\build\include
-INCLUDEPATH +=D:\opencv4.0.1\build\include\opencv2
 
-INCLUDEPATH +=D:\MindVision\Demo\QT5\Include
-#INCLUDEPATH +=D:\MindVision/Demo\vc\CameraApi.h
-#INCLUDEPATH +=D:\MindVision/Demo\vc\CameraApiLoad.h
-#INCLUDEPATH +=D:\MindVision/Demo\vc\CameraDefine.h
-#INCLUDEPATH +=D:\MindVision/Demo\vc\CameraGrabber.h
-#INCLUDEPATH +=D:\MindVision/Demo\vc\CameraImage.h
-#INCLUDEPATH +=D:\MindVision\Demo\vc\CameraStatus.h
+############windows#########windows################
 
-#INCLUDEPATH +=D:\MindVision\Demo\vc\include
-#INCLUDEPATH +=D:\MindVision/Demo\vc\CameraApi.h
-#INCLUDEPATH +=D:\MindVision/Demo\vc\CameraApiLoad.h
-#INCLUDEPATH +=D:\MindVision/Demo\vc\CameraDefine.h
-#INCLUDEPATH +=D:\MindVision/Demo\vc\CameraGrabber.h
-#INCLUDEPATH +=D:\MindVision/Demo\vc\CameraImage.h
-#INCLUDEPATH +=D:\MindVision\Demo\vc\CameraStatus.h
+#INCLUDEPATH +=D:\opencv4.0.1\build\include
+#INCLUDEPATH +=D:\opencv4.0.1\build\include\opencv2
+#INCLUDEPATH +=D:\MindVision\Demo\QT5\Include
+#LIBS+=D:\opencv4.0.1\build\x64\vc15\lib\opencv_world400.lib
+#LIBS+=D:\opencv4.0.1\build\x64\vc15\lib\opencv_world400d.lib
+#LIBS+=D:\MindVision\SDK\X64\MVCAMSDK_X64.lib
 
-LIBS+=D:\opencv4.0.1\build\x64\vc15\lib\opencv_world400.lib
-LIBS+=D:\opencv4.0.1\build\x64\vc15\lib\opencv_world400d.lib
+############windows#########windows################
 
-LIBS+=D:\MindVision\SDK\X64\MVCAMSDK_X64.lib
+
+############ubuntu#########ubuntu################
+
+INCLUDEPATH+=/usr/local/include/opencv4 \
+/usr/local/include/opencv2
+LIBS += /usr/local/lib/libopencv_calib3d.so \
+/usr/local/lib/libopencv_core.so \
+/usr/local/lib/libopencv_features2d.so \
+/usr/local/lib/libopencv_flann.so \
+/usr/local/lib/libopencv_highgui.so \
+/usr/local/lib/libopencv_imgcodecs.so \
+/usr/local/lib/libopencv_imgproc.so \
+/usr/local/lib/libopencv_ml.so \
+/usr/local/lib/libopencv_objdetect.so \
+/usr/local/lib/libopencv_photo.so \
+/usr/local/lib/libopencv_stitching.so \
+/usr/local/lib/libopencv_videoio.so \
+/usr/local/lib/libopencv_video.so
+
+############ubuntu#########ubuntu################
+
+
+
 
 #CONFIG(debug,debug|release){
 #LIBS+=D:\opencv4.0.1\build\x64\vc15\lib\opencv_world400.lib
