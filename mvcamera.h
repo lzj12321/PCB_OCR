@@ -2,7 +2,7 @@
 #define MVCAMERA_H
 #include<stdio.h>
 //#include<Windows.h>
-//#include "CameraApi.h"
+#include<CameraApi.h>
 #include<opencv2/opencv.hpp>
 
 #define SOFTWARE_MODE 0
@@ -14,24 +14,6 @@ class MVCamera
 public:
     MVCamera();
     virtual ~MVCamera();
-//    bool iniCamera();
-//    cv::Mat grabImg();
-//    bool openCamera();
-//    bool setExpose(uint expTime);
-//    bool setAnalogGain(uint gain);
-//    bool setTriggerMode(uint mode);
-//    bool setTriggerDelayTime(uint delayTime);
-//    void closeCamera();
-//private:
-//    tSdkCameraDevInfo CameraList[1];
-//    int cameraHandler = 0;
-//    tSdkCameraCapbility CameraInfo;
-
-
-
-
-    //////////////ubuntu//////////////////////
-
     bool iniCamera();
     cv::Mat grabImg();
     bool openCamera();
@@ -40,6 +22,24 @@ public:
     bool setTriggerMode(uint mode);
     bool setTriggerDelayTime(uint delayTime);
     void closeCamera();
+private:
+    tSdkCameraDevInfo CameraList[1];
+    int cameraHandler = 0;
+    tSdkCameraCapbility CameraInfo;
+
+
+
+
+    //////////////ubuntu//////////////////////
+
+//    bool iniCamera();
+//    cv::Mat grabImg();
+//    bool openCamera();
+//    bool setExpose(uint expTime);
+//    bool setAnalogGain(uint gain);
+//    bool setTriggerMode(uint mode);
+//    bool setTriggerDelayTime(uint delayTime);
+//    void closeCamera();
 
 };
 

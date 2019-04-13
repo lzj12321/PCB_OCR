@@ -6,6 +6,7 @@
 #include<cvandui.h>
 #include<preprocessimg.h>
 #include<mvcamera.h>
+#include<tesseractocr.h>
 
 namespace Ui {
 class MainWindow;
@@ -21,8 +22,7 @@ public:
 private slots:
     void on_pushButton_clicked();
     void on_pushButton_3_clicked();
-    void roiChanged(uint _roiX,uint _roiY,uint _roiWidth,uint _roiHeight);
-    void on_pushButton_2_clicked();   
+    void on_pushButton_2_clicked();
     void on_pushButton_4_clicked();
 
 private:
@@ -30,23 +30,31 @@ private:
     cvAndUi showTool;
     preProcessImg processTool;
     MVCamera cameraTool;
+    TesseractOCR extractTool;
     cv::Mat sourceMat;
     settingsDlg* setDlg;
     uint roiX,roiY,roiWidth,roiHeight;
 
+    std::vector<cv::Mat> validCodeMats;
     std::vector<QString> codes;
+    int pcbAngle;
+    int processResultFlag;
     uint processTime=0;
+    cv::Point borderPoint1,borderPoint2;
 private:
+    void processDataIni();
     cv::Mat getRoiMat(uint& roiX,uint& roiY,uint& roiWidth,uint& roiHeight);
-    void recognizeCode(int);
+    void recognizeCode();
     QString readResultFromTxt(QString txtPath);
     bool confirmResultIsValid(QString resultCode);
-    void outputProcessResult(int);
+    void outputProcessResult();
     cv::Mat drawResultMat();
     void showResultMat();
+    void showValidCodeMat();
     bool openCamera();
+    bool iniTesseract();
     void processImg();
-
+    void extractCodeFromImg();
 private slots:
     void slotStartGrab(QLabel*);
     void slotStopGrab();

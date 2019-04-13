@@ -25,10 +25,10 @@ public:
 private:
     cv::Mat sourceMat;
 
-    uint roiX=0;
-    uint roiY=0;
-    uint roiWidth=0;
-    uint roiHeight=0;
+    int roiX=0;
+    int roiY=0;
+    int roiWidth=0;
+    int roiHeight=0;
     uint exposeTime=0;
     uint analogGain=0;
 
@@ -66,6 +66,8 @@ private slots:
     void on_horizontalSlider_sliderMoved(int position);
 
     void on_pushButton_6_clicked();
+
+    void on_lineEdit_returnPressed();
 
 signals:
     void roiChanged(uint roiX,uint roiY,uint roiWidth,uint roiHeight);

@@ -19,9 +19,10 @@ MainWindow::MainWindow(QWidget *parent):
     setDlg=new settingsDlg;
     iconPreProcess();
     ui->lineEdit->setReadOnly(true);
-   // showFullScreen();
     openCamera();
+    iniTesseract();
     connect(setDlg,SIGNAL(cameraParamChanged(uint,uint)),this,SLOT(slotCameraParamChanged(uint,uint)));
+    showFullScreen();
 }
 
 MainWindow::~MainWindow()
@@ -68,47 +69,28 @@ void MainWindow::on_pushButton_3_clicked()
     setDlg->show();
 }
 
-void MainWindow::roiChanged(uint _roiX,uint _roiY,uint _roiWidth,uint _roiHeight)
-{
-    //processTool.setRoiParam(_roiX,_roiY,_roiWidth,_roiHeight);
-}
-
 void MainWindow::on_pushButton_2_clicked()
 {
-    processImg();
+    extractCodeFromImg();
+    showResultMat();
 }
 
 cv::Mat MainWindow::getRoiMat(uint& roiX,uint& roiY,uint& roiWidth,uint& roiHeight)
 {
-    // return sourceMat;
     setDlg->getRoiParam(roiX,roiY,roiWidth,roiHeight);
     if(roiX>sourceMat.cols||roiY>sourceMat.rows)
         return sourceMat.clone();
     if((roiX+roiWidth)>sourceMat.cols||(roiY+roiHeight)>sourceMat.rows)
         return(sourceMat(cv::Rect(roiX,roiY,sourceMat.cols-roiX,sourceMat.rows-roiY)).clone());
     return sourceMat(cv::Rect(roiX,roiY,roiWidth,roiHeight)).clone();
-    // processTool.setRoiParam(roiX,roiY,roiWidth,roiHeight);
 }
 
-void MainWindow::recognizeCode(int validCodeRegionNum)
+void MainWindow::recognizeCode()
 {
-    for(uint i=0;i<validCodeRegionNum;++i)
+    for(uint i=0;i<validCodeMats.size();++i)
     {
-        QProcess process;
-        QString imgPath=QString::number(i+1,10)+".tif";
-        QString cmd ="tesseract "+imgPath+" recognizeResult -l num2";
-        process.start(cmd);
-        if(!process.waitForStarted())
-        {
-            QMessageBox::warning(NULL,"Warning","Command execute error!");
-        }
-        if(!process.waitForFinished())
-        {
-            QMessageBox::warning(NULL,"Warning","Command execute timeout!");
-        }
-        QString tempCode=readResultFromTxt("recognizeResult.txt");
-        if(tempCode.remove(" ")!="")
-            codes.push_back(tempCode);
+        QString str=extractTool.extractStr(validCodeMats[i]);
+        codes.push_back(str);
     }
 }
 
@@ -141,15 +123,16 @@ bool MainWindow::confirmResultIsValid(QString resultCode)
         return false;
 }
 
-void MainWindow::outputProcessResult(int validCodeRegionNum)
+void MainWindow::outputProcessResult()
 {
-    ui->textEdit->clear();
     ui->label_4->setVisible(false);
 
+    ui->textEdit->setTextColor(Qt::blue);
     QString time=QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss");
     ui->textEdit->append(time);
 
-    switch(validCodeRegionNum)
+    ui->textEdit->setTextColor(Qt::red);
+    switch(processResultFlag)
     {
     case INVALID_INPUT_IMG:{
         ui->textEdit->append("Result:INVALID_INPUT_IMG");
@@ -164,17 +147,16 @@ void MainWindow::outputProcessResult(int validCodeRegionNum)
         ui->textEdit->append("Result:NOMATCH_REGION_DETECTED");
     }break;
     default:{
-        showResultMat();
-        ui->textEdit->append("PCB ANGLE:"+QString::number((int)processTool.pcbAngle,10));
-        ui->textEdit->append("Valid Code Region Num:"+QString::number(processTool.validCodeRegionMat.size(),10));
+        ui->textEdit->setTextColor(Qt::green);
+        showValidCodeMat();
+        ui->textEdit->append("PCB ANGLE:"+QString::number(pcbAngle,10));
+        ui->textEdit->append("Valid Code Region Num:"+QString::number(validCodeMats.size(),10));
         ui->textEdit->append("Used Time:"+QString::number(processTime,10)+"ms");
         for(uint i=0;i<codes.size();++i)
         {
-            qDebug()<<"codes:"<<codes[i];
-            ui->textEdit->append("Recognize code:"+codes[i]);
+            ui->textEdit->append("Recognize code:"+codes[i].remove("\n"));
         }
         ui->label_4->setVisible(true);
-        //showTool.showMatOnDlg(drawResultMat(),ui->label_3);
     };
     }
 
@@ -194,6 +176,7 @@ void MainWindow::outputProcessResult(int validCodeRegionNum)
         ui->lineEdit->setStyleSheet("background-color: rgb(255,0,0);");
         ui->lineEdit->setText("未识别到有效字符串！");
     }
+    ui->textEdit->append("\n");
 }
 
 cv::Mat MainWindow::drawResultMat()
@@ -205,9 +188,10 @@ cv::Mat MainWindow::drawResultMat()
     if(roiMat.channels()==1)
         cv::cvtColor(roiMat,roiMat,cv::COLOR_GRAY2RGB);
 
-    cv::line(roiMat,cv::Point(processTool.resultLine[0], processTool.resultLine[1]),
-            cv::Point(processTool.resultLine[2], processTool.resultLine[3]), cv::Scalar(0,0,255),3);
+    if(processResultFlag!=ROI_UNCERTAIN)
+        cv::line(roiMat,borderPoint1,borderPoint2, cv::Scalar(0,0,255),3);
 
+    //return resultMat;
     showTool.drawROI(resultMat,cv::Rect(roiX,roiY,roiWidth,roiHeight));
 
     roiMat.copyTo(resultMat(cv::Rect(roiX,roiY,roiMat.cols,roiMat.rows)));
@@ -216,11 +200,19 @@ cv::Mat MainWindow::drawResultMat()
 
 void MainWindow::showResultMat()
 {
+    if(sourceMat.empty())
+        return;
+    cv::Mat resultMat=drawResultMat();
+    showTool.showMatOnDlg(resultMat,ui->label_3);
+}
+
+void MainWindow::showValidCodeMat()
+{
     ui->comboBox->clear();
-    for(uint i=0;i<processTool.validCodeRegionMat.size();++i){
+    for(uint i=0;i<validCodeMats.size();++i){
         ui->comboBox->insertItem(i,"result "+QString::number(i,10));
     }
-    showTool.showMatOnDlg(processTool.validCodeRegionMat[0],ui->label_4);
+    showTool.showMatOnDlg(validCodeMats[0],ui->label_4);
 }
 
 bool MainWindow::openCamera()
@@ -228,29 +220,81 @@ bool MainWindow::openCamera()
     bool cameraStatus=cameraTool.openCamera();
     if(cameraStatus)
     {
-        cameraTool.setExpose(setDlg->getExposeTime());
-        cameraTool.setAnalogGain(setDlg->getAnalogGain());
+        ui->textEdit->setTextColor(Qt::green);
+        ui->textEdit->append("open camera sucess!");
+        if(cameraTool.setExpose(setDlg->getExposeTime()))
+        {
+            ui->textEdit->setTextColor(Qt::green);
+            ui->textEdit->append("set camera expose time sucess!");
+        }
+        else{
+            ui->textEdit->setTextColor(Qt::red);
+            ui->textEdit->append("set camera expose fail!");
+        }
+        if(cameraTool.setAnalogGain(setDlg->getAnalogGain()))
+        {
+            ui->textEdit->setTextColor(Qt::green);
+            ui->textEdit->append("set camera expose time sucess!");
+        }
+        else{
+            ui->textEdit->setTextColor(Qt::red);
+            ui->textEdit->append("set camera expose fail!");
+        }
     }
     else
+    {
+        ui->textEdit->setTextColor(Qt::red);
+        ui->textEdit->append("open camera fail!");
         ui->label_3->setText("相机掉线!");
+    }
     return cameraStatus;
 }
 
+bool MainWindow::iniTesseract()
+{
+    bool tesseractStatus=extractTool.iniTesseractOCR();
+    if(tesseractStatus){
+        ui->textEdit->setTextColor(Qt::green);
+        ui->textEdit->append("initialize tesseract sucess!");
+    }else
+    {
+        ui->textEdit->setTextColor(Qt::red);
+        ui->textEdit->append("initialize tesseract error!");
+    }
+    return tesseractStatus;
+}
+
 void MainWindow::processImg()
+{
+    cv::Mat roiMat=getRoiMat(roiX,roiY,roiWidth,roiHeight);
+    processResultFlag=processTool.extractValidCodeRegion(roiMat,validCodeMats,pcbAngle,borderPoint1,borderPoint2);
+}
+
+void MainWindow::extractCodeFromImg()
 {
     QTime timer;
     timer.start();
     codes.clear();
     ui->lineEdit->clear();
+
     if(sourceMat.empty())
     {
         QMessageBox::warning(NULL,"Warning","Empty Img!");
         return;
     }
-    int validCodeRegionNum=processTool.extractValidCodeRegion(getRoiMat(roiX,roiY,roiWidth,roiHeight));
-    if(validCodeRegionNum>0)
-        recognizeCode(validCodeRegionNum);
-    outputProcessResult(validCodeRegionNum);
+
+    ///////////ini process data////////////////////////////////////
+    processDataIni();
+
+    ///////////extract the valid code region////////////////////////
+    processImg();
+
+    ///////////recognize the code in img////////////////////////////
+    recognizeCode();
+
+    ///////////output process result////////////////////////////////
+    outputProcessResult();
+
     processTime=timer.elapsed();
 }
 
@@ -272,18 +316,23 @@ void MainWindow::slotCameraParamChanged(uint exposeTime, uint analogGain)
 
 void MainWindow::on_pushButton_4_clicked()
 {
-    //cv::Mat mat=cameraTool.grabImg();
     sourceMat=cameraTool.grabImg().clone();
     showTool.showMatOnDlg(sourceMat,ui->label_3);
-    processImg();
-    //showTool.showMatOnDlg(sourceMat,ui->label_3);
-    // cv::imshow("grabImg",showTool.resizeMat(mat,0.5));
+    extractCodeFromImg();
+    showResultMat();
+}
+
+void MainWindow::processDataIni()
+{
+    validCodeMats.clear();
+    processResultFlag=0;
+    pcbAngle=361;
 }
 
 void MainWindow::on_comboBox_currentIndexChanged(int index)
 {
     if(index!=-1)
-        showTool.showMatOnDlg(processTool.validCodeRegionMat[index],ui->label_4);
+        showTool.showMatOnDlg(validCodeMats[index],ui->label_4);
 }
 
 void MainWindow::on_pushButton_5_clicked()

@@ -25,7 +25,7 @@ public:
     cv::Mat maskMat;
     cv::Mat maskMulSrcMat;
     cv::Mat dilateContourMat;
-public:
+private:
     std::vector<std::vector<cv::Point>> filterContours;
     std::vector<cv::Rect> validCodeRect;
     std::vector<cv::RotatedRect> validCodeRotatedRect;
@@ -34,6 +34,7 @@ public:
     std::vector<cv::Vec4i> validCodeRegionHierarchy;
     cv::Vec4i resultLine;
     float pcbAngle=361;
+    cv::Point borderP1,borderP2;
 private:
     uint thresholdValue=170;
     uint thresholdFlag=cv::THRESH_BINARY;
@@ -62,16 +63,13 @@ public:
     void processDataIni();
 
     ///////////entrance///////////////
-    int extractValidCodeRegion(const cv::Mat&);
+    int extractValidCodeRegion(const cv::Mat&,std::vector<cv::Mat>&,int&pcbAngle,cv::Point&p1,cv::Point&p2);
 
     //////////detect the src img angle//////////
-    float detectLineAngle(cv::Mat src);
+    int detectBorderToSetRoi(cv::Mat src);
 
     //////////detect the font's color////////////
     bool detectCharacterColor(cv::Mat src);
-
-    /////////detect the roi img's angle and set the roi mat/////////
-    int detectLineAndSetRoiRegion(cv::Mat src,const cv::Mat&mask,cv::Mat& dst);
 
     ///////////threshold the roimat//////
     void thresholdImg();
@@ -90,9 +88,6 @@ public:
 
     ///////refine valid rect////////////////////////
     void refineValidRect();
-
-    ///////save the valid code region mat//////////
-    void saveValidCodeMat();
 
     void rectifyMat(cv::Mat&mat);
 

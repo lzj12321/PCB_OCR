@@ -8,23 +8,9 @@ preProcessImg::preProcessImg()
 
 }
 
-void preProcessImg::saveValidCodeMat()
+int preProcessImg::extractValidCodeRegion(const cv::Mat &src,std::vector<cv::Mat>&validMats,int&angle,cv::Point&p1,cv::Point&p2)
 {
-    for(int i=0;i<validCodeRegionMat.size();++i)
-    {
-        QString imgName=QString::number(i+1,10)+".tif";
-        cv::Mat tempMat;
-        if(validCodeRegionMat[i].channels()==1)
-            cv::cvtColor(validCodeRegionMat[i],tempMat,cv::COLOR_GRAY2RGB);
-        else
-            tempMat=validCodeRegionMat[i].clone();
-        cv::imwrite(imgName.toStdString(),tempMat);
-    }
-}
-
-int preProcessImg::extractValidCodeRegion(const cv::Mat &src)
-{
-    //////////initialize the data//////////////////
+    //////////initialize the data/////////////////////////
     processDataIni();
 
     //////////confirm the input img is valid//////////////
@@ -36,34 +22,10 @@ int preProcessImg::extractValidCodeRegion(const cv::Mat &src)
         roiMat=src.clone();
 
     //////////detect line to calculate the img's angle////
-    float angle=detectLineAngle(src.clone());
-    if(angle>=srcImgAngleRange||angle<=-srcImgAngleRange)
-        return ANGLE_UNCERTAIN;
-
-
-
-    cv::Point p1,p2;
-    cv::Mat test=src.clone();
-    showTool.rotate3CMat(test,test,angle);
-    qDebug()<<"angle:"<<angle;
-    //angle=abs(angle);
-    float angle1=(angle/180)*3.14;
-    p1=showTool.getPointAffinedPos(cv::Point(resultLine[0],resultLine[1]),cv::Point(src.cols/2,src.rows/2),cv::Point(test.cols/2,test.rows/2),angle1);
-    p2=showTool.getPointAffinedPos(cv::Point(resultLine[2],resultLine[3]),cv::Point(src.cols/2,src.rows/2),cv::Point(test.cols/2,test.rows/2),angle1);
-    cv::line(test,p1,p2,cv::Scalar(0,255,0),2);
-    cv::imshow("test",test);
-
-
-
-    /////////rotate the img and mask////////////////////////
-    cv::Mat dstRotate;
-    cv::Mat dstMask=cv::Mat(roiMat.rows,roiMat.cols,CV_8UC1,cv::Scalar::all(255));
-    showTool.rotateMat(dstMask,dstMask,cvRound(angle));
-    showTool.rotateMat(roiMat,dstRotate,cvRound(angle));
-
-    ////////detect the roi//////////////////////////////////
-    if(detectLineAndSetRoiRegion(dstRotate,dstMask,roiMat)!=RESULT_NORMAL)
+    if(detectBorderToSetRoi(src.clone())!=RESULT_NORMAL)
         return ROI_UNCERTAIN;
+
+    //return ROI_UNCERTAIN;
 
     if(roiMat.channels()!=1)
         cv::cvtColor(roiMat,roiMat,cv::COLOR_RGB2GRAY);
@@ -89,9 +51,10 @@ int preProcessImg::extractValidCodeRegion(const cv::Mat &src)
     /////////refine the valid code region and threshod it in OTSU method////////////////
     refineValidRect();
 
-    ///////save the valid code region////////////
-    saveValidCodeMat();
-
+    validMats=validCodeRegionMat;
+    angle=pcbAngle;
+    p1=borderP1;
+    p2=borderP2;
     ///////return the num of valid code region/////////
     return validCodeRegionMat.size();
 }
@@ -116,7 +79,7 @@ void preProcessImg::thresholdImg()
     {
         uint adaThrBlockSize=25;
         cv::adaptiveThreshold(roiMat,thresholdMat,255,cv::ADAPTIVE_THRESH_MEAN_C ,cv::THRESH_BINARY_INV,adaThrBlockSize,1);
-       // cv::imshow("adaptiveThreshold",thresholdMat);
+        // cv::imshow("adaptiveThreshold",thresholdMat);
         //morphThresholdMat=thresholdMat.clone();
     }break;
     default:
@@ -146,10 +109,10 @@ void preProcessImg::findAndFilterContours()
         }
     }
     ///////////////draw source contours ////////////////
-//        for(int i=0;i<filterContours.size();++i)
-//        {
-//            cv::drawContours(contoursMat,filterContours,i,cv::Scalar(255,0,0),2);
-//        }
+    //        for(int i=0;i<filterContours.size();++i)
+    //        {
+    //            cv::drawContours(contoursMat,filterContours,i,cv::Scalar(255,0,0),2);
+    //        }
 }
 
 void preProcessImg::contoursMaskToExtractCodeRegion()
@@ -163,7 +126,7 @@ void preProcessImg::contoursMaskToExtractCodeRegion()
 
     cv::Mat dilateKernelMat=cv::getStructuringElement(morphExtractCodeRegionShape,cv::Size(morphRectWidth,morphRectHeight));
     cv::dilate(maskMulSrcMat,dilateContourMat,dilateKernelMat);
- //   cv::imshow("dilateContourMat",dilateContourMat);
+    //   cv::imshow("dilateContourMat",dilateContourMat);
     cv::findContours(dilateContourMat,validCodeRegionContours, validCodeRegionHierarchy, cv::RETR_LIST, cv::CHAIN_APPROX_SIMPLE);
     auto iter=validCodeRegionContours.begin();
     for(;iter!=validCodeRegionContours.end();++iter){
@@ -219,9 +182,9 @@ void preProcessImg::refineValidRect()
             return;
         }
         cv::Mat _thresholdMat=tempMat(cv::Rect(maxRect));
-      //  cv::imshow("_thresholdMat",_thresholdMat);
+        //  cv::imshow("_thresholdMat",_thresholdMat);
         rectifyMat(_thresholdMat);
-      //  cv::imshow("rectify_thresholdMat",_thresholdMat);
+        //  cv::imshow("rectify_thresholdMat",_thresholdMat);
         cv::threshold(_thresholdMat,_thresholdMat,255,255,cv::THRESH_OTSU);
         uint stretchHeight=20;
         cv::Mat _result=cv::Mat(_thresholdMat.rows+stretchHeight,_thresholdMat.cols,CV_8UC1,cv::Scalar::all(0));
@@ -231,9 +194,8 @@ void preProcessImg::refineValidRect()
     }
 }
 
-float preProcessImg::detectLineAngle(cv::Mat src)
+int preProcessImg::detectBorderToSetRoi(cv::Mat src)
 {
-    //return 361;
     cv::Mat thrMat;
     if(src.channels()!=1)
         cv::cvtColor(src,thrMat,cv::COLOR_RGB2GRAY);
@@ -254,7 +216,7 @@ float preProcessImg::detectLineAngle(cv::Mat src)
 
     if(lines.size()==0){
         qDebug()<<"no line detected!";
-        return 361;
+        return ROI_UNCERTAIN;
     }
     cv::Vec4i maxLine;
     float resultSlope=0;
@@ -266,20 +228,67 @@ float preProcessImg::detectLineAngle(cv::Mat src)
             maxLine=tempLine;
     }
     resultSlope=(maxLine[3]-maxLine[1])/(float)(maxLine[2]-maxLine[0]);
+    qDebug()<<"slope:"<<resultSlope;
     resultLine[0]=0;
     resultLine[1]=cvRound(maxLine[1]-resultSlope*maxLine[0]);
     resultLine[2]=thrMat.cols;
     resultLine[3]=cvRound(resultSlope*(resultLine[2]-resultLine[0])+resultLine[1]);
-//    //contoursMat=cannyMat.clone();
-//    contoursMat=src.clone();
-//    //cv::cvtColor(src,contoursMat,cv::COLOR_GRAY2RGB);
-//    cv::line(contoursMat,cv::Point(resultLine[0], resultLine[1]), cv::Point(resultLine[2], resultLine[3]), cv::Scalar(0,0,255),2);
-//    cv::imshow("cannymat",contoursMat);
-   // qDebug()<<"slope:"<<resultSlope;
     pcbAngle=atan(resultSlope);
     pcbAngle=pcbAngle/3.14*180;
-  //  qDebug()<<"angle:"<<pcbAngle;
-    return pcbAngle;
+
+    borderP1=cv::Point(resultLine[0],resultLine[1]);
+    borderP2=cv::Point(resultLine[2],resultLine[3]);
+
+
+    /////////rotate the img and mask////////////////////////
+    cv::Mat dstMask=cv::Mat(roiMat.rows,roiMat.cols,CV_8UC1,cv::Scalar::all(255));
+    showTool.rotateMat(dstMask,dstMask,cvRound(pcbAngle));
+    showTool.rotateMat(roiMat,roiMat,cvRound(pcbAngle));
+
+
+    cv::Point p1,p2;
+    cv::Mat test=src.clone();
+    showTool.rotate3CMat(test,test,pcbAngle);
+    qDebug()<<"angle:"<<pcbAngle;
+    float angle1=(pcbAngle/180)*3.14;
+    p1=showTool.getPointAffinedPos(borderP1,cv::Point(src.cols/2,src.rows/2),cv::Point(dstMask.cols/2,dstMask.rows/2),angle1);
+    p2=showTool.getPointAffinedPos(borderP2,cv::Point(src.cols/2,src.rows/2),cv::Point(dstMask.cols/2,dstMask.rows/2),angle1);
+    cv::line(test,p1,p2,cv::Scalar(0,255,0),2);
+    cv::imshow("test",test);
+
+    resultLine[0]=p1.x;
+    resultLine[1]=p1.y;
+    resultLine[2]=p2.x;
+    resultLine[3]=p2.y;
+
+
+    int startY=(resultLine[1]>resultLine[3])?resultLine[3]:resultLine[1];
+    int roiY=0;
+    int roiHeight=50;
+    uchar* matPtr=roiMat.data;
+    uchar* maskPtr=dstMask.data;
+    while((startY-roiY)>0)
+    {
+        int blackPtNum=0;
+        int index=roiMat.cols*(startY-roiY);
+        for(int i=0;i<roiMat.cols;++i){
+            if(matPtr[index+i]==0&&maskPtr[index+i]==255)
+                blackPtNum++;
+        }
+        ++roiY;
+        if((blackPtNum/(float)roiMat.cols)<0.1)
+            break;
+    }
+    startY=((startY-roiY-roiHeight)>0)?(startY-roiY-roiHeight):0;
+    if((startY+roiHeight)>roiMat.rows){
+        return ROI_UNCERTAIN;
+    }
+    if(startY+roiHeight>roiMat.rows)
+    {
+        roiHeight=roiMat.rows-startY;
+    }
+    roiMat=roiMat(cv::Rect(0,startY,roiMat.cols,roiHeight)).clone();
+    return RESULT_NORMAL;
 }
 
 bool preProcessImg::detectCharacterColor(cv::Mat src)
@@ -293,105 +302,11 @@ bool preProcessImg::detectCharacterColor(cv::Mat src)
         if(matPtr[i]<thresholdValue)
             validPointNum++;
     }
- //   qDebug()<<"validPointNum:"<<validPointNum;
+    //   qDebug()<<"validPointNum:"<<validPointNum;
     if(validPointNum>=pointThreshold)
         return true;
-}
-
-int preProcessImg::detectLineAndSetRoiRegion(cv::Mat src,const cv::Mat&dstmask,cv::Mat&dst)
-{
-    if(src.empty()||dstmask.empty()||src.cols!=dstmask.cols||src.rows!=dstmask.rows)
-        return ROI_UNCERTAIN;
-
-    cv::Mat thrMat;
-    if(src.channels()!=1)
-        cv::cvtColor(src,thrMat,cv::COLOR_RGB2GRAY);
     else
-        thrMat=src.clone();
-
-    cv::threshold(thrMat,thrMat,100,255,cv::THRESH_BINARY);
-    cv::medianBlur(thrMat,thrMat,5);
-    cv::Mat cannyMat;
-    cv::Canny(thrMat,cannyMat,50,200);
-
-    uint linePointThreshold=50;
-    uint minLineLength=80;
-    uint maxLinePointGap=10;
-    std::vector<cv::Vec4i> lines;
-    cv::Vec4i resultLine;
-//    cv::HoughLinesP(cannyMat(cv::Rect(0,cannyMat.rows/2,cannyMat.cols,cannyMat.rows/2)),
-//                    lines,1, CV_PI/180, linePointThreshold, minLineLength, maxLinePointGap);
-    cv::HoughLinesP(cannyMat,lines,1, CV_PI/180, linePointThreshold, minLineLength, maxLinePointGap);
-    if(lines.size()==0){
-        return ROI_UNCERTAIN;
-    }
-    cv::Vec4i maxLine;
-    maxLine[1]=0;
-    for(size_t i = 0; i < lines.size();i++)
-    {
-        cv::Vec4i tempLine = lines[i];
-        if(tempLine[1]>maxLine[1])
-            maxLine=tempLine;
-    }
-    float resultSlope=(maxLine[3]-maxLine[1])/(float)(maxLine[2]-maxLine[0]);
-    float angle=atan(resultSlope);
-    angle=angle*180/3.14;
-  //  qDebug()<<"slope:"<<resultSlope;
-  //  qDebug()<<"roi angle:"<<angle;
-    if(angle>roiImgAngleRange||angle<-roiImgAngleRange)
-        return ROI_UNCERTAIN;
-   // qDebug()<<"slope:"<<resultSlope;
-    resultLine[0]=maxLine[0];
-    resultLine[1]=maxLine[1];
-    resultLine[2]=thrMat.cols;
-    resultLine[3]=cvRound(resultSlope*(resultLine[2]-resultLine[0]))+resultLine[1];
-    //cv::cvtColor(cannyMat,cannyMat,cv::COLOR_GRAY2BGR);
-    //cv::line(cannyMat,cv::Point(resultLine[0], resultLine[1]), cv::Point(resultLine[2], resultLine[3]), cv::Scalar(0,0,255),2);
-
-    for(int i=0;i<4;++i)
-    {
-        qDebug()<<resultLine[i];
-    }
-    int startY=(resultLine[1]>resultLine[3])?resultLine[3]:resultLine[1];
-    int roiY=0;
-    int roiHeight=50;
-    uchar* matPtr=thrMat.data;
-    uchar* maskPtr=dstmask.data;
-//return ROI_UNCERTAIN;
-  //  cv::imshow("src",src);
-   // cv::imshow("mask",dstmask);
- //   return ROI_UNCERTAIN;
-    while((startY-roiY)>0)
-    {
-        int blackPtNum=0;
-        int index=thrMat.cols*(startY-roiY);
-        for(uint i=0;i<thrMat.cols;++i){
-            if(matPtr[index+i]==0&&maskPtr[index+i]==255)
-                blackPtNum++;
-        }
-        ++roiY;
-        if((blackPtNum/(float)thrMat.cols)<0.1)
-            break;
-    }
-    //return ROI_UNCERTAIN;
-    startY=((startY-roiY-roiHeight)>0)?(startY-roiY-roiHeight):0;
-    if((startY+roiHeight)>src.rows){
-        return ROI_UNCERTAIN;
-    }
-    if(startY+roiHeight>src.rows)
-    {
-        roiHeight=src.rows-startY;
-       // qDebug()<<"startY+roiHeight>src.rows";
-    }
-
-  //return ROI_UNCERTAIN;
-//    qDebug()<<"src.cols:"<<src.cols;
-//    qDebug()<<"src.rows:"<<src.rows;
-//    qDebug()<<"startY:"<<startY;
-//    qDebug()<<"roiHeight:"<<roiHeight;
-    dst=src(cv::Rect(0,startY,src.cols,roiHeight)).clone();
-   // cv::imshow("dstss",dst);
-    return RESULT_NORMAL;
+        return false;
 }
 
 void preProcessImg::rectifyMat(cv::Mat &mat)

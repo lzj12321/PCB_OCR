@@ -175,16 +175,15 @@ void settingsDlg::on_pushButton_2_clicked()
         roiWidth=abs(pt1X-pt2X);
         roiHeight=abs(pt1Y-pt2Y);
     }
-    settingsDlgIni();
     emit roiChanged(roiX,roiY,roiWidth,roiHeight);
-
-    paramSave();
     isRoiChanged=false;
 
     analogGain=ui->lineEdit_2->text().toInt();
     exposeTime=ui->lineEdit->text().toInt();
     emit cameraParamChanged(exposeTime,analogGain);
 
+    paramSave();
+    settingsDlgIni();
     close();
 }
 
@@ -248,11 +247,15 @@ void settingsDlg::on_pushButton_4_clicked()
 void settingsDlg::on_horizontalSlider_sliderMoved(int position)
 {
     if(position==0)return;
-    //exposeTime=position;
     ui->lineEdit->setText(QString::number(position,10));
 }
 
 void settingsDlg::on_pushButton_6_clicked()
 {
     emit stopGrab();
+}
+
+void settingsDlg::on_lineEdit_returnPressed()
+{
+    ui->horizontalSlider->setValue(ui->lineEdit->text().toInt());
 }
