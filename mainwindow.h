@@ -37,6 +37,7 @@ private:
 
     std::vector<cv::Mat> validCodeMats;
     std::vector<QString> codes;
+    std::vector<int>matchScores;
     int pcbAngle;
     int processResultFlag;
     uint processTime=0;

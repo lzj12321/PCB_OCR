@@ -89,8 +89,12 @@ void MainWindow::recognizeCode()
 {
     for(uint i=0;i<validCodeMats.size();++i)
     {
-        QString str=extractTool.extractStr(validCodeMats[i]);
-        codes.push_back(str);
+        QString str="";
+        int matchScore=-1;
+        if(extractTool.extractStr(validCodeMats[i],str,matchScore)){
+            codes.push_back(str);
+            matchScores.push_back(matchScore);
+        }
     }
 }
 
@@ -155,6 +159,7 @@ void MainWindow::outputProcessResult()
         for(uint i=0;i<codes.size();++i)
         {
             ui->textEdit->append("Recognize code:"+codes[i].remove("\n"));
+            ui->textEdit->append("Match Score:"+QString::number(matchScores[i],10));
         }
         ui->label_4->setVisible(true);
     };
@@ -275,6 +280,7 @@ void MainWindow::extractCodeFromImg()
     QTime timer;
     timer.start();
     codes.clear();
+    matchScores.clear();
     ui->lineEdit->clear();
 
     if(sourceMat.empty())
@@ -292,10 +298,10 @@ void MainWindow::extractCodeFromImg()
     ///////////recognize the code in img////////////////////////////
     recognizeCode();
 
+    processTime=timer.elapsed();
+
     ///////////output process result////////////////////////////////
     outputProcessResult();
-
-    processTime=timer.elapsed();
 }
 
 void MainWindow::slotStartGrab(QLabel * label)

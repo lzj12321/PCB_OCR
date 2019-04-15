@@ -9,11 +9,12 @@ class TesseractOCR
 {
 public:
     TesseractOCR();
-    QString extractStr(const cv::Mat&mat);
+    bool extractStr(const cv::Mat&mat,QString&recognizeStr,int& matchScore);
     bool iniTesseractOCR();
     bool unIniTesseractOCR();
 private:
     tesseract::TessBaseAPI *tesseractApi;
+    bool tesseractStatus=false;
 };
 
 #endif // TESSERACTOCR_H

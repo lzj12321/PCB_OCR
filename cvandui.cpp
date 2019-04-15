@@ -167,3 +167,20 @@ cv::Point cvAndUi::getPointAffinedPos(const cv::Point &src, const cv::Point &cen
     qDebug()<<"cos angle:"<<cos(angle);
     return dst;
 }
+
+float cvAndUi::pointTolineDistance(const cv::Point &pt, const cv::Vec4i &line)
+{
+    cv::Point lineP1,lineP2;
+    lineP1=cv::Point(line[0],line[1]);
+    lineP2=cv::Point(line[2],line[3]);
+
+    cv::Point v1,v2;
+    v1=cv::Point(pt.x-lineP1.x,pt.y-lineP1.y);
+    v2=cv::Point(lineP2.x-lineP1.x,lineP2.y-lineP1.y);
+
+    float m_v1v2=sqrt(pow(v1.x,2)+pow(v1.y,2))*sqrt(pow(v2.x,2)+pow(v2.y,2));
+    float angle=acos((v1.x*v2.x+v1.y*v2.y)/(m_v1v2));
+
+    float distance=sqrt(pow(v1.x,2)+pow(v1.y,2))*sin(angle);
+    return distance;
+}

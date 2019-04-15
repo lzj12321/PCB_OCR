@@ -49,7 +49,7 @@ private:
     uint morphRectWidth=21;
     uint morphRectHeight=1;
 
-    uint minValidRegionWidth=200;
+    uint minValidRegionWidth=190;
     uint maxValidRegionWidth;
 
     int srcImgAngleRange=15;

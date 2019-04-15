@@ -19,7 +19,7 @@
      <rect>
       <x>320</x>
       <y>40</y>
-      <width>461</width>
+      <width>411</width>
       <height>71</height>
      </rect>
     </property>
@@ -43,7 +43,7 @@
      <number>1</number>
     </property>
     <property name="text">
-     <string> PCB_OCR(测试版)</string>
+     <string> PCB_OCR BETA</string>
     </property>
     <property name="alignment">
      <set>Qt::AlignCenter</set>
@@ -52,7 +52,7 @@
    <widget class="QLabel" name="label_2">
     <property name="geometry">
      <rect>
-      <x>780</x>
+      <x>730</x>
       <y>80</y>
       <width>101</width>
       <height>31</height>
@@ -120,7 +120,7 @@
    <widget class="QLineEdit" name="lineEdit">
     <property name="geometry">
      <rect>
-      <x>1040</x>
+      <x>970</x>
       <y>50</y>
       <width>501</width>
       <height>61</height>
@@ -146,7 +146,7 @@
    <widget class="QLabel" name="label_5">
     <property name="geometry">
      <rect>
-      <x>930</x>
+      <x>860</x>
       <y>50</y>
       <width>111</width>
       <height>61</height>
@@ -181,7 +181,7 @@
    <widget class="QPushButton" name="pushButton">
     <property name="geometry">
      <rect>
-      <x>1570</x>
+      <x>1540</x>
       <y>30</y>
       <width>141</width>
       <height>51</height>
@@ -201,7 +201,7 @@
    <widget class="QPushButton" name="pushButton_2">
     <property name="geometry">
      <rect>
-      <x>1570</x>
+      <x>1540</x>
       <y>80</y>
       <width>141</width>
       <height>51</height>
@@ -221,7 +221,7 @@
    <widget class="QPushButton" name="pushButton_3">
     <property name="geometry">
      <rect>
-      <x>1710</x>
+      <x>1680</x>
       <y>80</y>
       <width>141</width>
       <height>51</height>
@@ -290,7 +290,7 @@ p, li { white-space: pre-wrap; }
    <widget class="QPushButton" name="pushButton_4">
     <property name="geometry">
      <rect>
-      <x>1710</x>
+      <x>1680</x>
       <y>30</y>
       <width>141</width>
       <height>51</height>
@@ -342,7 +342,7 @@ p, li { white-space: pre-wrap; }
    <widget class="QPushButton" name="pushButton_5">
     <property name="geometry">
      <rect>
-      <x>1570</x>
+      <x>1540</x>
       <y>130</y>
       <width>141</width>
       <height>51</height>

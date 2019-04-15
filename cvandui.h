@@ -20,6 +20,7 @@ public:
     void drawROI(cv::Mat&mat,cv::Rect roi,cv::Scalar color=cv::Scalar(255,0,0),int thickness=3);
     void drawROI(cv::Mat&mat,uint roix,uint roiy,uint w,uint h,cv::Scalar color=cv::Scalar(255,0,0),int thickness=3);
     cv::Point getPointAffinedPos(const cv::Point &src, const cv::Point &center,const cv::Point&center2, double angle);
+    float pointTolineDistance(const cv::Point&pt,const cv::Vec4i& line);
 };
 
 #endif // CVANDUI_H
